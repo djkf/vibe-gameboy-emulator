@@ -60,7 +60,8 @@ class EmulatorApp {
     const startAudioButton = document.getElementById('start-audio') as HTMLButtonElement;
     const fullscreenButton = document.getElementById('fullscreen') as HTMLButtonElement;
 
-    loadGameButton?.addEventListener('click', () => this.loadROM('/blocks.gb', 'Block Puzzle Game'));
+    // Use Vite's base URL for GitHub Pages compatibility
+    loadGameButton?.addEventListener('click', () => this.loadROM(`${import.meta.env.BASE_URL}blocks.gb`, 'Block Puzzle Game'));
     startButton?.addEventListener('click', () => this.start());
     pauseButton?.addEventListener('click', () => this.pause());
     resetButton?.addEventListener('click', () => this.reset());
