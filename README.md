@@ -2,11 +2,47 @@
 
 A fully functional Nintendo Game Boy emulator written in TypeScript, capable of running classic puzzle games with complete graphics, sound, and input support.
 
-## ⚡ Vibe Coding Experiment
+## 🤖 Vibe Coding Experiment: AI-Only Development
 
-**This entire emulator was written solely by AI using "Vibe Coding" - an experimental development approach where the AI writes all code without direct human programming.** The human engineer did not touch any code files during development, only providing guidance and using undo when the AI encountered issues.
+**This entire emulator was written solely by AI using "Vibe Coding"—an experimental approach where the AI writes all code without direct human programming.** The human engineer did not touch any code files during development, only providing guidance, reviewing results, and using undo when the AI encountered issues.
 
-This project demonstrates the potential of AI-assisted development while highlighting both the capabilities and limitations of current AI coding tools.
+### AI Collaboration Details
+- **Claude Sonnet 4** handled the initial architecture, core CPU, PPU, memory, input, and overall emulator structure. Claude also addressed major architectural and logic bugs, including sprite and DMA issues, and performed the foundational debugging and integration work.
+- **GPT-4.1** focused on sound (APU) implementation, audio smoothing, and deep performance optimizations. This included refactoring the CPU, PPU, and APU for O(1) array access and cache-friendly data structures, adding a fullscreen UI button, improving browser compatibility, and diagnosing/addressing missing sound issues. Profiling and systematic debugging strategies were also introduced at this stage.
+
+**At no point did the driving engineer directly modify the code. All changes were made by the AI agents.**
+
+## 🛠️ Major Problems and Solutions
+
+- **Sound Quality Issues:**
+  - Problem: Audio output was harsh or missing on some channels
+  - Solution: Added a low-pass filter, tuned smoothing, and debugged channel enable/trigger logic (GPT-4.1)
+
+- **Performance Bottlenecks:**
+  - Problem: Emulator was slow due to property access and inefficient data structures
+  - Solution: Refactored CPU, PPU, and APU to use `Uint8Array` and direct array access for all hot paths (registers, palettes, memory, etc.) (GPT-4.1)
+
+- **Sprite and DMA Bugs:**
+  - Problem: Sprites were invisible or corrupted due to coordinate and DMA issues
+  - Solution: Complete rewrite of sprite rendering and OAM DMA logic (Claude Sonnet 4)
+
+- **Debugging and Profiling:**
+  - Problem: Difficult to isolate performance and sound bugs
+  - Solution: Systematic profiling, step-by-step refactoring, and clear separation of concerns (GPT-4.1)
+
+## 📝 Expanded Technical Notes
+
+- **Sound (APU):**
+  - Added low-pass filter for smoother audio
+  - Refactored square wave channel to use O(1) register access
+  - Debugged and improved channel enable/trigger logic
+- **CPU/PPU:**
+  - All register and palette accesses are now O(1) via `Uint8Array` and constants
+  - Instruction handlers refactored for direct array access (e.g., `regs[REG_A]`)
+- **UI:**
+  - Fullscreen button added using the Fullscreen API, maintaining correct aspect ratio
+- **Browser Compatibility:**
+  - All features tested in modern browsers for smooth performance
 
 ## 🎮 Features
 
@@ -189,13 +225,6 @@ npm test
 
 - **Classic Puzzle Game** - Fully playable with all piece types
 - Designed to be compatible with other Game Boy ROMs
-
-## 📝 Technical Notes
-
-- **Cycle-accurate timing** for proper game compatibility
-- **Scanline-based rendering** for authentic visual behavior
-- **Hardware-accurate interrupts** for correct game flow
-- **Realistic timer behavior** including timing variations for RNG
 
 ## 🔮 Future Improvements
 

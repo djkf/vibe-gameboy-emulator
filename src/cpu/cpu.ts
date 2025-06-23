@@ -9,7 +9,6 @@ const REG_D = 3;
 const REG_E = 4;
 const REG_H = 5;
 const REG_L = 6;
-const REG_F = 7;
 
 /**
  * Game Boy LR35902 CPU

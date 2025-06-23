@@ -13,7 +13,6 @@ export class SoundChip {
   private scriptNode: ScriptProcessorNode | null = null;
   private sampleRate = 48000; // Standard audio sample rate
   private bufferSize = 256; // Lower buffer size for less latency
-  private phase = 0;
   private frameSeqCounter = 0;
   private channelPhases = [0, 0, 0, 0];
   private prevFilteredSample = 0; // For low-pass filter

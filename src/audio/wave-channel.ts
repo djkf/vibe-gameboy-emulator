@@ -6,7 +6,6 @@ export class WaveChannel {
   private lengthCounter = 0;
   private volumeShift = 0;
   private waveTable = new Uint8Array(32); // 32 4-bit samples
-  private sampleIndex = 0;
 
   writeRegister(address: number, value: number): void {
     this.registers[address] = value & 0xFF;
@@ -34,7 +33,6 @@ export class WaveChannel {
     this.enabled = true;
     this.lengthCounter = 256 - (this.registers[0xFF1B] ?? 0);
     this.volumeShift = ((this.registers[0xFF1C] ?? 0) >> 5) & 0x03;
-    this.sampleIndex = 0;
   }
 
   stepLength() {
