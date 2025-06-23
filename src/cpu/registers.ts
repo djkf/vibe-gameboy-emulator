@@ -2,101 +2,98 @@
  * Game Boy CPU Registers
  * Manages the LR35902's 8-bit and 16-bit registers, flags, PC, and SP
  */
+
+// Register indices
+const REG_A = 0;
+const REG_B = 1;
+const REG_C = 2;
+const REG_D = 3;
+const REG_E = 4;
+const REG_H = 5;
+const REG_L = 6;
+const REG_F = 7; // Flags register (Z N H C in upper 4 bits)
+
 export class Registers {
-  // 8-bit registers
-  private _A = 0x01; // Accumulator - post-boot state
-  private _B = 0x00;
-  private _C = 0x13; // post-boot state
-  private _D = 0x00;
-  private _E = 0xD8; // post-boot state
-  private _H = 0x01; // post-boot state
-  private _L = 0x4D; // post-boot state
-
-  // Flags
-  private _flagZ = true;  // Zero flag - post-boot state
-  private _flagN = false; // Negative flag
-  private _flagH = true;  // Half-carry flag - post-boot state
-  private _flagC = true;  // Carry flag - post-boot state
-
+  // 8-bit registers and flags in a single Uint8Array
+  private regs = new Uint8Array(8); // [A, B, C, D, E, H, L, F]
   // 16-bit registers
   private _PC = 0x0100; // Program Counter - post-boot state (cartridge entry)
   private _SP = 0xFFFE; // Stack Pointer - post-boot state
 
+  constructor() {
+    // Post-boot state
+    this.regs[REG_A] = 0x01;
+    this.regs[REG_B] = 0x00;
+    this.regs[REG_C] = 0x13;
+    this.regs[REG_D] = 0x00;
+    this.regs[REG_E] = 0xD8;
+    this.regs[REG_H] = 0x01;
+    this.regs[REG_L] = 0x4D;
+    this.regs[REG_F] = 0xB0; // Z=1, N=0, H=1, C=1 (bits 7,5,4)
+  }
+
   // 8-bit register accessors
-  get A(): number { return this._A; }
-  set A(value: number) { this._A = value & 0xFF; }
+  get A(): number { return this.regs[REG_A]; }
+  set A(value: number) { this.regs[REG_A] = value & 0xFF; }
 
-  get B(): number { return this._B; }
-  set B(value: number) { this._B = value & 0xFF; }
+  get B(): number { return this.regs[REG_B]; }
+  set B(value: number) { this.regs[REG_B] = value & 0xFF; }
 
-  get C(): number { return this._C; }
-  set C(value: number) { this._C = value & 0xFF; }
+  get C(): number { return this.regs[REG_C]; }
+  set C(value: number) { this.regs[REG_C] = value & 0xFF; }
 
-  get D(): number { return this._D; }
-  set D(value: number) { this._D = value & 0xFF; }
+  get D(): number { return this.regs[REG_D]; }
+  set D(value: number) { this.regs[REG_D] = value & 0xFF; }
 
-  get E(): number { return this._E; }
-  set E(value: number) { this._E = value & 0xFF; }
+  get E(): number { return this.regs[REG_E]; }
+  set E(value: number) { this.regs[REG_E] = value & 0xFF; }
 
-  get H(): number { return this._H; }
-  set H(value: number) { this._H = value & 0xFF; }
+  get H(): number { return this.regs[REG_H]; }
+  set H(value: number) { this.regs[REG_H] = value & 0xFF; }
 
-  get L(): number { return this._L; }
-  set L(value: number) { this._L = value & 0xFF; }
-
-  // Flag accessors
-  get flagZ(): boolean { return this._flagZ; }
-  set flagZ(value: boolean) { this._flagZ = value; }
-
-  get flagN(): boolean { return this._flagN; }
-  set flagN(value: boolean) { this._flagN = value; }
-
-  get flagH(): boolean { return this._flagH; }
-  set flagH(value: boolean) { this._flagH = value; }
-
-  get flagC(): boolean { return this._flagC; }
-  set flagC(value: boolean) { this._flagC = value; }
+  get L(): number { return this.regs[REG_L]; }
+  set L(value: number) { this.regs[REG_L] = value & 0xFF; }
 
   // Flags as F register (bits 7-4, lower bits always 0)
-  get F(): number {
-    return (
-      (this._flagZ ? 0x80 : 0) |  // bit 7
-      (this._flagN ? 0x40 : 0) |  // bit 6
-      (this._flagH ? 0x20 : 0) |  // bit 5
-      (this._flagC ? 0x10 : 0)    // bit 4
-    );
-  }
+  get F(): number { return this.regs[REG_F] & 0xF0; }
+  set F(value: number) { this.regs[REG_F] = value & 0xF0; }
 
-  set F(value: number) {
-    this._flagZ = (value & 0x80) !== 0;
-    this._flagN = (value & 0x40) !== 0;
-    this._flagH = (value & 0x20) !== 0;
-    this._flagC = (value & 0x10) !== 0;
-  }
+  // Flag accessors
+  get flagZ(): boolean { return (this.regs[REG_F] & 0x80) !== 0; }
+  set flagZ(value: boolean) { this.regs[REG_F] = value ? (this.regs[REG_F] | 0x80) : (this.regs[REG_F] & ~0x80); }
+
+  get flagN(): boolean { return (this.regs[REG_F] & 0x40) !== 0; }
+  set flagN(value: boolean) { this.regs[REG_F] = value ? (this.regs[REG_F] | 0x40) : (this.regs[REG_F] & ~0x40); }
+
+  get flagH(): boolean { return (this.regs[REG_F] & 0x20) !== 0; }
+  set flagH(value: boolean) { this.regs[REG_F] = value ? (this.regs[REG_F] | 0x20) : (this.regs[REG_F] & ~0x20); }
+
+  get flagC(): boolean { return (this.regs[REG_F] & 0x10) !== 0; }
+  set flagC(value: boolean) { this.regs[REG_F] = value ? (this.regs[REG_F] | 0x10) : (this.regs[REG_F] & ~0x10); }
 
   // 16-bit register pair accessors
-  get BC(): number { return (this._B << 8) | this._C; }
+  get BC(): number { return (this.regs[REG_B] << 8) | this.regs[REG_C]; }
   set BC(value: number) {
-    this._B = (value >> 8) & 0xFF;
-    this._C = value & 0xFF;
+    this.regs[REG_B] = (value >> 8) & 0xFF;
+    this.regs[REG_C] = value & 0xFF;
   }
 
-  get DE(): number { return (this._D << 8) | this._E; }
+  get DE(): number { return (this.regs[REG_D] << 8) | this.regs[REG_E]; }
   set DE(value: number) {
-    this._D = (value >> 8) & 0xFF;
-    this._E = value & 0xFF;
+    this.regs[REG_D] = (value >> 8) & 0xFF;
+    this.regs[REG_E] = value & 0xFF;
   }
 
-  get HL(): number { return (this._H << 8) | this._L; }
+  get HL(): number { return (this.regs[REG_H] << 8) | this.regs[REG_L]; }
   set HL(value: number) {
-    this._H = (value >> 8) & 0xFF;
-    this._L = value & 0xFF;
+    this.regs[REG_H] = (value >> 8) & 0xFF;
+    this.regs[REG_L] = value & 0xFF;
   }
 
-  get AF(): number { return (this._A << 8) | this.F; }
+  get AF(): number { return (this.regs[REG_A] << 8) | this.F; }
   set AF(value: number) {
-    this._A = (value >> 8) & 0xFF;
-    this.F = value & 0xFF;
+    this.regs[REG_A] = (value >> 8) & 0xFF;
+    this.F = value & 0xF0;
   }
 
   // Program Counter and Stack Pointer

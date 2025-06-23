@@ -1,6 +1,16 @@
 import { Registers } from './registers';
 import { MemoryBus } from '../memory/memory-bus';
 
+// Register indices for O(1) access
+const REG_A = 0;
+const REG_B = 1;
+const REG_C = 2;
+const REG_D = 3;
+const REG_E = 4;
+const REG_H = 5;
+const REG_L = 6;
+const REG_F = 7;
+
 /**
  * Game Boy LR35902 CPU
  * Implements the CPU with fetch-decode-execute cycle using instruction lookup table
@@ -525,313 +535,315 @@ export class CPU {
 
   // 8-bit load immediate instructions
   private ld_B_n(): number {
-    this.registers.B = this.fetchImmediate8();
+    // this.registers.B = this.fetchImmediate8();
+    // O(1) array access:
+    (this.registers as any).regs[REG_B] = this.fetchImmediate8();
     return 8;
   }
 
   private ld_C_n(): number {
-    this.registers.C = this.fetchImmediate8();
+    (this.registers as any).regs[REG_C] = this.fetchImmediate8();
     return 8;
   }
 
   private ld_D_n(): number {
-    this.registers.D = this.fetchImmediate8();
+    (this.registers as any).regs[REG_D] = this.fetchImmediate8();
     return 8;
   }
 
   private ld_E_n(): number {
-    this.registers.E = this.fetchImmediate8();
+    (this.registers as any).regs[REG_E] = this.fetchImmediate8();
     return 8;
   }
 
   private ld_H_n(): number {
-    this.registers.H = this.fetchImmediate8();
+    (this.registers as any).regs[REG_H] = this.fetchImmediate8();
     return 8;
   }
 
   private ld_L_n(): number {
-    this.registers.L = this.fetchImmediate8();
+    (this.registers as any).regs[REG_L] = this.fetchImmediate8();
     return 8;
   }
 
   private ld_A_n(): number {
-    this.registers.A = this.fetchImmediate8();
+    (this.registers as any).regs[REG_A] = this.fetchImmediate8();
     return 8;
   }
 
   // 8-bit register-to-register load instructions
   private ld_B_B(): number {
-    this.registers.B = this.registers.B;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_B_C(): number {
-    this.registers.B = this.registers.C;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_B_D(): number {
-    this.registers.B = this.registers.D;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_B_E(): number {
-    this.registers.B = this.registers.E;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_B_H(): number {
-    this.registers.B = this.registers.H;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_B_L(): number {
-    this.registers.B = this.registers.L;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_B_HL(): number {
-    this.registers.B = this.memory.read8(this.registers.HL);
+    (this.registers as any).regs[REG_B] = this.memory.read8(this.registers.HL);
     return 8;
   }
 
   private ld_B_A(): number {
-    this.registers.B = this.registers.A;
+    (this.registers as any).regs[REG_B] = (this.registers as any).regs[REG_A];
     return 4;
   }
 
   private ld_C_B(): number {
-    this.registers.C = this.registers.B;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_C_C(): number {
-    this.registers.C = this.registers.C;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_C_D(): number {
-    this.registers.C = this.registers.D;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_C_E(): number {
-    this.registers.C = this.registers.E;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_C_H(): number {
-    this.registers.C = this.registers.H;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_C_L(): number {
-    this.registers.C = this.registers.L;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_C_HL(): number {
-    this.registers.C = this.memory.read8(this.registers.HL);
+    (this.registers as any).regs[REG_C] = this.memory.read8(this.registers.HL);
     return 8;
   }
 
   private ld_C_A(): number {
-    this.registers.C = this.registers.A;
+    (this.registers as any).regs[REG_C] = (this.registers as any).regs[REG_A];
     return 4;
   }
 
   private ld_D_B(): number {
-    this.registers.D = this.registers.B;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_D_C(): number {
-    this.registers.D = this.registers.C;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_D_D(): number {
-    this.registers.D = this.registers.D;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_D_E(): number {
-    this.registers.D = this.registers.E;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_D_H(): number {
-    this.registers.D = this.registers.H;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_D_L(): number {
-    this.registers.D = this.registers.L;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_D_HL(): number {
-    this.registers.D = this.memory.read8(this.registers.HL);
+    (this.registers as any).regs[REG_D] = this.memory.read8(this.registers.HL);
     return 8;
   }
 
   private ld_D_A(): number {
-    this.registers.D = this.registers.A;
+    (this.registers as any).regs[REG_D] = (this.registers as any).regs[REG_A];
     return 4;
   }
 
   private ld_E_B(): number {
-    this.registers.E = this.registers.B;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_E_C(): number {
-    this.registers.E = this.registers.C;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_E_D(): number {
-    this.registers.E = this.registers.D;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_E_E(): number {
-    this.registers.E = this.registers.E;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_E_H(): number {
-    this.registers.E = this.registers.H;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_E_L(): number {
-    this.registers.E = this.registers.L;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_E_HL(): number {
-    this.registers.E = this.memory.read8(this.registers.HL);
+    (this.registers as any).regs[REG_E] = this.memory.read8(this.registers.HL);
     return 8;
   }
 
   private ld_E_A(): number {
-    this.registers.E = this.registers.A;
+    (this.registers as any).regs[REG_E] = (this.registers as any).regs[REG_A];
     return 4;
   }
 
   private ld_H_B(): number {
-    this.registers.H = this.registers.B;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_H_C(): number {
-    this.registers.H = this.registers.C;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_H_D(): number {
-    this.registers.H = this.registers.D;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_H_E(): number {
-    this.registers.H = this.registers.E;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_H_H(): number {
-    this.registers.H = this.registers.H;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_H_L(): number {
-    this.registers.H = this.registers.L;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_H_HL(): number {
-    this.registers.H = this.memory.read8(this.registers.HL);
+    (this.registers as any).regs[REG_H] = this.memory.read8(this.registers.HL);
     return 8;
   }
 
   private ld_H_A(): number {
-    this.registers.H = this.registers.A;
+    (this.registers as any).regs[REG_H] = (this.registers as any).regs[REG_A];
     return 4;
   }
 
   private ld_L_B(): number {
-    this.registers.L = this.registers.B;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_L_C(): number {
-    this.registers.L = this.registers.C;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_L_D(): number {
-    this.registers.L = this.registers.D;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_L_E(): number {
-    this.registers.L = this.registers.E;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_L_H(): number {
-    this.registers.L = this.registers.H;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_L_L(): number {
-    this.registers.L = this.registers.L;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_L_HL(): number {
-    this.registers.L = this.memory.read8(this.registers.HL);
+    (this.registers as any).regs[REG_L] = this.memory.read8(this.registers.HL);
     return 8;
   }
 
   private ld_L_A(): number {
-    this.registers.L = this.registers.A;
+    (this.registers as any).regs[REG_L] = (this.registers as any).regs[REG_A];
     return 4;
   }
 
   private ld_A_B(): number {
-    this.registers.A = this.registers.B;
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_B];
     return 4;
   }
 
   private ld_A_C(): number {
-    this.registers.A = this.registers.C;
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_C];
     return 4;
   }
 
   private ld_A_D(): number {
-    this.registers.A = this.registers.D;
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_D];
     return 4;
   }
 
   private ld_A_E(): number {
-    this.registers.A = this.registers.E;
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_E];
     return 4;
   }
 
   private ld_A_H(): number {
-    this.registers.A = this.registers.H;
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_H];
     return 4;
   }
 
   private ld_A_L(): number {
-    this.registers.A = this.registers.L;
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_L];
     return 4;
   }
 
   private ld_A_A(): number {
-    this.registers.A = this.registers.A; // Essentially a NOP but still valid
+    (this.registers as any).regs[REG_A] = (this.registers as any).regs[REG_A]; // Essentially a NOP but still valid
     return 4;
   }
 

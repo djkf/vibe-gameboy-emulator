@@ -57,11 +57,17 @@ class EmulatorApp {
     const startButton = document.getElementById('start') as HTMLButtonElement;
     const pauseButton = document.getElementById('pause') as HTMLButtonElement;
     const resetButton = document.getElementById('reset') as HTMLButtonElement;
+    const startAudioButton = document.getElementById('start-audio') as HTMLButtonElement;
+    const fullscreenButton = document.getElementById('fullscreen') as HTMLButtonElement;
 
     loadGameButton?.addEventListener('click', () => this.loadROM('/blocks.gb', 'Block Puzzle Game'));
     startButton?.addEventListener('click', () => this.start());
     pauseButton?.addEventListener('click', () => this.pause());
     resetButton?.addEventListener('click', () => this.reset());
+    startAudioButton?.addEventListener('click', () => {
+      this.gameboy.soundChip.startAudio();
+    });
+    fullscreenButton?.addEventListener('click', () => this.enterFullscreen());
 
     // Keyboard controls
     document.addEventListener('keydown', (e) => this.handleKeyDown(e));
@@ -233,6 +239,41 @@ class EmulatorApp {
     if (button) {
       this.gameboy.setJoypadButton(button, false);
       event.preventDefault();
+    }
+  }
+
+  private enterFullscreen(): void {
+    // Use the parent of the canvas for fullscreen to include border
+    const container = this.canvas.parentElement || this.canvas;
+    if (container.requestFullscreen) {
+      container.requestFullscreen();
+    } else if ((container as any).webkitRequestFullscreen) {
+      (container as any).webkitRequestFullscreen();
+    }
+    // Listen for fullscreen change to resize canvas
+    document.addEventListener('fullscreenchange', () => this.resizeCanvasForFullscreen());
+    document.addEventListener('webkitfullscreenchange', () => this.resizeCanvasForFullscreen());
+  }
+
+  private resizeCanvasForFullscreen(): void {
+    const isFullscreen = document.fullscreenElement || (document as any).webkitFullscreenElement;
+    if (isFullscreen) {
+      // Fit canvas to screen, preserving aspect ratio (160:144)
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+      const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
+      let width = screenW;
+      let height = Math.round(width / aspect);
+      if (height > screenH) {
+        height = screenH;
+        width = Math.round(height * aspect);
+      }
+      this.canvas.style.width = width + 'px';
+      this.canvas.style.height = height + 'px';
+    } else {
+      // Restore default scaling
+      this.canvas.style.width = (this.SCREEN_WIDTH * this.SCALE) + 'px';
+      this.canvas.style.height = (this.SCREEN_HEIGHT * this.SCALE) + 'px';
     }
   }
 }

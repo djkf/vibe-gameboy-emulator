@@ -175,61 +175,44 @@ export class PPU {
   }
 
   /**
-   * Render the background for the current scanline
+   * Render the background for the current scanline (optimized)
    */
   private renderBackgroundScanline(): void {
     const lcdControl = this.memory.read8(PPU.LCD_CONTROL);
     const scrollY = this.memory.read8(PPU.SCROLL_Y);
     const scrollX = this.memory.read8(PPU.SCROLL_X);
-    
-    // Determine tile map address
     const tileMapBase = (lcdControl & 0x08) ? PPU.TILE_MAP_1 : PPU.TILE_MAP_0;
-    
-    // Determine tile data addressing mode
     const unsignedTileData = (lcdControl & 0x10) !== 0;
-    
-    // Calculate which background row we're drawing
     const backgroundY = (this._currentLine + scrollY) & 0xFF;
-    const tileRow = Math.floor(backgroundY / 8);
-    const tileRowOffset = backgroundY % 8;
-    
-    // Render each pixel in the scanline
+    const tileRow = backgroundY >> 3;
+    const tileRowOffset = backgroundY & 7;
+    let tileCol = scrollX >> 3;
+    let tileColOffset = scrollX & 7;
+    let tileMapAddress = tileMapBase + (tileRow * 32) + tileCol;
+    let tileIndex = this.memory.read8(tileMapAddress);
+    let tileDataAddress = unsignedTileData
+      ? PPU.TILE_DATA_0 + (tileIndex * 16)
+      : 0x9000 + (((tileIndex > 127 ? tileIndex - 256 : tileIndex)) * 16);
+    let byte1 = this.memory.read8(tileDataAddress + (tileRowOffset * 2));
+    let byte2 = this.memory.read8(tileDataAddress + (tileRowOffset * 2) + 1);
     for (let screenX = 0; screenX < this.screenWidth; screenX++) {
-      const backgroundX = (screenX + scrollX) & 0xFF;
-      const tileCol = Math.floor(backgroundX / 8);
-      const tileColOffset = backgroundX % 8;
-      
-      // Get tile index from tile map
-      const tileMapAddress = tileMapBase + (tileRow * 32) + tileCol;
-      const tileIndex = this.memory.read8(tileMapAddress);
-      
-      // Calculate tile data address
-      let tileDataAddress: number;
-      if (unsignedTileData) {
-        // Unsigned: 0x8000 + (index * 16)
-        tileDataAddress = PPU.TILE_DATA_0 + (tileIndex * 16);
-      } else {
-        // Signed: 0x9000 + (signed_index * 16)
-        const signedIndex = tileIndex > 127 ? tileIndex - 256 : tileIndex;
-        tileDataAddress = 0x9000 + (signedIndex * 16);
+      if (tileColOffset === 8) {
+        tileCol++;
+        tileColOffset = 0;
+        tileMapAddress = tileMapBase + (tileRow * 32) + tileCol;
+        tileIndex = this.memory.read8(tileMapAddress);
+        tileDataAddress = unsignedTileData
+          ? PPU.TILE_DATA_0 + (tileIndex * 16)
+          : 0x9000 + (((tileIndex > 127 ? tileIndex - 256 : tileIndex)) * 16);
+        byte1 = this.memory.read8(tileDataAddress + (tileRowOffset * 2));
+        byte2 = this.memory.read8(tileDataAddress + (tileRowOffset * 2) + 1);
       }
-      
-      // Get the two bytes for this row of the tile
-      const byte1 = this.memory.read8(tileDataAddress + (tileRowOffset * 2));
-      const byte2 = this.memory.read8(tileDataAddress + (tileRowOffset * 2) + 1);
-      
-      // Extract the pixel value (2 bits)
       const bitIndex = 7 - tileColOffset;
       const bit1 = (byte1 >> bitIndex) & 1;
       const bit2 = (byte2 >> bitIndex) & 1;
       const pixelValue = (bit2 << 1) | bit1;
-      
-      // Map to grayscale (0 = white, 3 = black)
-      const grayscale = this.mapToGrayscale(pixelValue);
-      
-      // Set pixel in framebuffer
-      const bufferIndex = (this._currentLine * this.screenWidth) + screenX;
-      this.framebuffer[bufferIndex] = grayscale;
+      this.framebuffer[(this._currentLine * this.screenWidth) + screenX] = BG_PALETTE_LOOKUP[pixelValue];
+      tileColOffset++;
     }
   }
 
@@ -349,9 +332,8 @@ export class PPU {
         }
       }
       
-      // Map sprite pixel using sprite palette
-      const grayscale = this.mapSpriteToGrayscale(pixelValue);
-      this.framebuffer[bufferIndex] = grayscale;
+      // Map sprite pixel using palette (use BG_PALETTE_LOOKUP for both)
+      this.framebuffer[bufferIndex] = BG_PALETTE_LOOKUP[pixelValue & 3];
     }
   }
 
@@ -362,36 +344,6 @@ export class PPU {
     const start = this._currentLine * this.screenWidth;
     const end = start + this.screenWidth;
     this.framebuffer.fill(color, start, end);
-  }
-
-  /**
-   * Map Game Boy palette value to grayscale
-   */
-  private mapToGrayscale(paletteValue: number): number {
-    // Default palette: 0=white, 1=light gray, 2=dark gray, 3=black
-    switch (paletteValue) {
-      case 0: return 0; // White
-      case 1: return 1; // Light gray
-      case 2: return 2; // Dark gray
-      case 3: return 3; // Black
-      default: return 0;
-    }
-  }
-
-  /**
-   * Map sprite pixel using sprite palette
-   */
-  private mapSpriteToGrayscale(pixelValue: number): number {
-    // For now, use same mapping as background
-    // In a full implementation, you'd read from sprite palette registers (0xFF48, 0xFF49)
-    // But sprites use palettes differently - color 0 is always transparent
-    switch (pixelValue) {
-      case 0: return 0; // Transparent (shouldn't reach here)
-      case 1: return 1; // Light gray
-      case 2: return 2; // Dark gray  
-      case 3: return 3; // Black
-      default: return 0;
-    }
   }
 
   /**
@@ -408,3 +360,6 @@ export class PPU {
     this._vblankRequested = false;
   }
 }
+
+// Palette lookup arrays for O(1) mapping (file-level constants)
+const BG_PALETTE_LOOKUP = [0, 1, 2, 3];

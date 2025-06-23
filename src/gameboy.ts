@@ -1,6 +1,7 @@
 import { CPU } from './cpu/cpu';
 import { MemoryBus } from './memory/memory-bus';
 import { PPU } from './graphics/ppu';
+import { SoundChip } from './audio/soundchip';
 
 /**
  * Main Game Boy Emulator Class
@@ -10,6 +11,7 @@ export class GameBoy {
   public readonly cpu: CPU;
   public readonly memory: MemoryBus;
   public readonly ppu: PPU;
+  public readonly soundChip: SoundChip;
   
   private _totalCycles = 0;
   private _isRunning = false;
@@ -19,6 +21,8 @@ export class GameBoy {
 
   constructor() {
     this.memory = new MemoryBus();
+    this.soundChip = new SoundChip();
+    this.memory.soundChip = this.soundChip;
     this.cpu = new CPU(this.memory);
     this.ppu = new PPU(this.memory);
   }

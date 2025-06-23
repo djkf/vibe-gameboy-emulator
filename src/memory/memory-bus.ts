@@ -1,4 +1,5 @@
 import { Joypad } from '../input/joypad';
+import { SoundChip } from '../audio/soundchip';
 
 /**
  * Game Boy Memory Bus
@@ -33,6 +34,9 @@ export class MemoryBus {
   // Timer state
   private dividerCounter = 0;  // Internal 16-bit counter for DIV register
   private timerCounter = 0;    // Internal counter for TIMA
+
+  // Optional sound chip
+  public soundChip?: SoundChip;
 
   constructor() {
     // Initialize interrupt enable register to enable V-blank interrupt
@@ -120,6 +124,11 @@ export class MemoryBus {
   write8(address: number, value: number): void {
     address = address & 0xFFFF; // Wrap to 16-bit
     value = value & 0xFF; // Ensure 8-bit value
+
+    // Sound registers: 0xFF10–0xFF3F
+    if (address >= 0xFF10 && address <= 0xFF3F && this.soundChip) {
+      this.soundChip.writeRegister(address, value);
+    }
 
     if (address < 0x8000) {
       // ROM region (0x0000-0x7FFF) - ignore writes for now
