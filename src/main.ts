@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 /**
  * Game Boy Emulator - Main Entry Point
  */
